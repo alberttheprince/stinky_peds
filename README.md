@@ -50,7 +50,7 @@ RegisterCommand("checkdirt", function()
                 print("U good tho. Your dirt-level: " .. dirt .. "/200")
             end
         else
-            print("Daten konnten nicht geladen werden.")
+            print("Couldn't fetch data.")
         end
     end)
 end)
