@@ -104,7 +104,7 @@ CreateThread(function()
 
             if IsControlJustReleased(0, 38) and not wasRecentlyCleaned then
                 wasRecentlyCleaned = true
-
+                busySpinner("You are finally washing your ass")
                 -- Wash animation example, take whatever you think it fits
                 local animDict = "mp_safehouseshower@male@"
                 local animName = "male_shower_idle_b"
@@ -122,6 +122,7 @@ CreateThread(function()
                 FreezeEntityPosition(ped, false)
 
                 notify("You washed yourself.")
+                BusyspinnerOff()
                 TriggerServerEvent("sync_flies:clientRequestUpdateDirt", -50) -- removes 50 dirt after every washing
 
                 Wait(5000) -- Cooldown
@@ -160,3 +161,8 @@ function helpNotify(msg)
     EndTextCommandDisplayHelp(0, false, true, -1)
 end
 
+function busySpinner(message) -- this shit is nice
+    BeginTextCommandBusyspinnerOn('STRING')
+    AddTextComponentSubstringPlayerName(message)
+    EndTextCommandBusyspinnerOn(3)
+end
