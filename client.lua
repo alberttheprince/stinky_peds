@@ -206,6 +206,7 @@ end
 -- this threads needs a little bit of optimization, I'm on it. I promise <3
 
 CreateThread(function() -- thread to let npc's react if you don't wash your ass
+if useNpcReactions then
     while true do
         local playerPed = PlayerPedId()
         local playerCoords = GetEntityCoords(playerPed)
@@ -255,4 +256,5 @@ CreateThread(function() -- thread to let npc's react if you don't wash your ass
         end
         Wait(5000)
     end
+end
 end)
