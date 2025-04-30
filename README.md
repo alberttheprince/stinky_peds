@@ -22,6 +22,7 @@ Well, now you can actually *prove it*.
 * Everything is configurable & easily expandable (if you know what you're doing)
 * What more features do you expect from a dirty ass script like this
 * Tried to optimize it as good as possible, pullrequest me to it
+* You can enable/disable NPC reactions to your stinky ped
 
 ### 🎯 Why tho?
 
