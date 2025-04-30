@@ -1,6 +1,11 @@
+-- Set this to true if you want npc's to react to your stinky ass ped
+local useNpcReactions = true 
+local debugPrints = true
+
 -- Don't alter these variables, otherwise you will fuck shit up
 local flyEffects = {}
 local playerDirt = 0
+local lastReactionTime = {}
 
 function spawnFlySwarm(ped)
     if not DoesEntityExist(ped) then return end
@@ -161,8 +166,93 @@ function helpNotify(msg)
     EndTextCommandDisplayHelp(0, false, true, -1)
 end
 
-function busySpinner(message) -- this shit is nice
+function busySpinner(message)
     BeginTextCommandBusyspinnerOn('STRING')
     AddTextComponentSubstringPlayerName(message)
     EndTextCommandBusyspinnerOn(3)
 end
+
+function dbgPrint(msg)
+	if debugPrints then
+		print("^3[DEBUG]^0 " .. tostring(msg))
+	end
+end
+
+function getRandomDisgustAnim()
+    local anims = {
+        {dict = "re@construction", anim = "out_of_breath"},
+        {dict = "gestures@m@standing@casual", anim = "gesture_no_way"},
+        {dict = "anim@mp_player_intcelebrationfemale@stinker", anim = "stinker"}
+    }
+    local choice = anims[math.random(#anims)]
+    dbgPrint("Random animation: " .. choice.dict .. " - " .. choice.anim)
+    return choice.dict, choice.anim
+end
+
+function EnumeratePeds()
+    return coroutine.wrap(function()
+        local handle, ped = FindFirstPed()
+        local success
+        repeat
+            if not IsEntityDead(ped) then
+                coroutine.yield(ped)
+            end
+            success, ped = FindNextPed(handle)
+        until not success
+        EndFindPed(handle)
+    end)
+end
+
+-- this threads needs a little bit of optimization, I'm on it. I promise <3
+
+CreateThread(function() -- thread to let npc's react if you don't wash your ass
+    while true do
+        local playerPed = PlayerPedId()
+        local playerCoords = GetEntityCoords(playerPed)
+		local rndm = math.random(1, 2)
+        for ped in EnumeratePeds() do
+            if DoesEntityExist(ped) and not IsPedAPlayer(ped) and not IsPedDeadOrDying(ped, true) then
+                local pedCoords = GetEntityCoords(ped)
+                local dist = #(playerCoords - pedCoords)
+
+                if dist < 6.0 then
+                    local pedId = tostring(ped)
+
+                    if not lastReactionTime[pedId] then
+						if not IsPedInAnyVehicle(ped) then
+							if rndm == 1 then
+								dbgPrint("Ped " .. ped .. " is close enough, playing animation.")
+	
+								-- Take control if necessary
+								if not NetworkHasControlOfEntity(ped) then
+									NetworkRequestControlOfEntity(ped)
+									Wait(50)
+								end
+								ClearPedTasks(ped)
+								local dict, anim = getRandomDisgustAnim()
+								RequestAnimDict(dict)
+								while not HasAnimDictLoaded(dict) do
+									Wait(10)
+								end
+	
+								TaskPlayAnim(ped, dict, anim, 8.0, -8.0, 3000, 49, 0, false, false, false)
+								dbgPrint("Played animation on Ped " .. ped .. ": " .. dict .. " - " .. anim)
+	
+								lastReactionTime[pedId] = true
+								Wait(10000)
+								lastReactionTime[pedId] = nil
+								dbgPrint("Cooldown ended for Ped " .. pedId)
+								
+							else
+								dbgPrint("Random check skipped animation for Ped " .. ped)
+							end
+						end
+                    else
+                        dbgPrint("Ped " .. ped .. " is on cooldown.")
+                    end
+                end
+            end
+        end
+        Wait(5000)
+    end
+end)
