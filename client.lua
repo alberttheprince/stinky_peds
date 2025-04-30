@@ -219,34 +219,34 @@ CreateThread(function() -- thread to let npc's react if you don't wash your ass
                     local pedId = tostring(ped)
 
                     if not lastReactionTime[pedId] then
-						if not IsPedInAnyVehicle(ped) then
-							if rndm == 1 then
-								dbgPrint("Ped " .. ped .. " is close enough, playing animation.")
+			if not IsPedInAnyVehicle(ped) then
+				if rndm == 1 then
+					dbgPrint("Ped " .. ped .. " is close enough, playing animation.")
 	
-								-- Take control if necessary
-								if not NetworkHasControlOfEntity(ped) then
-									NetworkRequestControlOfEntity(ped)
-									Wait(50)
-								end
-								ClearPedTasks(ped)
-								local dict, anim = getRandomDisgustAnim()
-								RequestAnimDict(dict)
-								while not HasAnimDictLoaded(dict) do
-									Wait(10)
-								end
+					-- Take control if necessary
+					if not NetworkHasControlOfEntity(ped) then
+						NetworkRequestControlOfEntity(ped)
+						Wait(50)
+					end
+					ClearPedTasks(ped)
+					local dict, anim = getRandomDisgustAnim()
+					RequestAnimDict(dict)
+					while not HasAnimDictLoaded(dict) do
+						Wait(10)
+					end
 	
-								TaskPlayAnim(ped, dict, anim, 8.0, -8.0, 3000, 49, 0, false, false, false)
-								dbgPrint("Played animation on Ped " .. ped .. ": " .. dict .. " - " .. anim)
+					TaskPlayAnim(ped, dict, anim, 8.0, -8.0, 3000, 49, 0, false, false, false)
+					dbgPrint("Played animation on Ped " .. ped .. ": " .. dict .. " - " .. anim)
 	
-								lastReactionTime[pedId] = true
-								Wait(10000)
-								lastReactionTime[pedId] = nil
-								dbgPrint("Cooldown ended for Ped " .. pedId)
-								
-							else
-								dbgPrint("Random check skipped animation for Ped " .. ped)
-							end
-						end
+					lastReactionTime[pedId] = true
+					SetTimeout(10000, function()
+						lastReactionTime[pedId] = nil
+						dbgPrint("Cooldown ended for Ped " .. pedId)
+					end)			
+				else
+					dbgPrint("Random check skipped animation for Ped " .. ped)
+				end
+			end
                     else
                         dbgPrint("Ped " .. ped .. " is on cooldown.")
                     end
